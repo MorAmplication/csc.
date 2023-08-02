@@ -14,6 +14,7 @@ import { GraphQLModule } from "@nestjs/graphql";
 @Module({
   controllers: [],
   imports: [
+    KafkaModule,
     ProductModule,
     HealthModule,
     PrismaModule,
