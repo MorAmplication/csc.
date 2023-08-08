@@ -9,12 +9,19 @@ https://docs.amplication.com/how-to/custom-code
 
 ------------------------------------------------------------------------------
   */
-import { Module, forwardRef } from "@nestjs/common";
-import { MorganModule } from "nest-morgan";
-import { ACLModule } from "../../auth/acl.module";
-import { AuthModule } from "../../auth/auth.module";
-@Module({
-  imports: [ACLModule, forwardRef(() => AuthModule), MorganModule],
-  exports: [ACLModule, AuthModule, MorganModule],
-})
-export class ProductModuleBase {}
+import { InputType, Field } from "@nestjs/graphql";
+import { ApiProperty } from "@nestjs/swagger";
+import { IsString } from "class-validator";
+
+@InputType()
+class UserWhereUniqueInput {
+  @ApiProperty({
+    required: true,
+    type: String,
+  })
+  @IsString()
+  @Field(() => String)
+  id!: string;
+}
+
+export { UserWhereUniqueInput as UserWhereUniqueInput };

@@ -18,75 +18,83 @@ import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
 import * as nestAccessControl from "nest-access-control";
 import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
-import { ProductService } from "../product.service";
+import { UserService } from "../user.service";
 import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
-import { ProductCreateInput } from "./ProductCreateInput";
-import { ProductWhereInput } from "./ProductWhereInput";
-import { ProductWhereUniqueInput } from "./ProductWhereUniqueInput";
-import { ProductFindManyArgs } from "./ProductFindManyArgs";
-import { ProductUpdateInput } from "./ProductUpdateInput";
-import { Product } from "./Product";
+import { UserCreateInput } from "./UserCreateInput";
+import { UserWhereInput } from "./UserWhereInput";
+import { UserWhereUniqueInput } from "./UserWhereUniqueInput";
+import { UserFindManyArgs } from "./UserFindManyArgs";
+import { UserUpdateInput } from "./UserUpdateInput";
+import { User } from "./User";
 
 @swagger.ApiBearerAuth()
 @common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
-export class ProductControllerBase {
+export class UserControllerBase {
   constructor(
-    protected readonly service: ProductService,
+    protected readonly service: UserService,
     protected readonly rolesBuilder: nestAccessControl.RolesBuilder
   ) {}
   @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
-  @swagger.ApiCreatedResponse({ type: Product })
+  @swagger.ApiCreatedResponse({ type: User })
   @nestAccessControl.UseRoles({
-    resource: "Product",
+    resource: "User",
     action: "create",
     possession: "any",
   })
   @swagger.ApiForbiddenResponse({
     type: errors.ForbiddenException,
   })
-  async create(@common.Body() data: ProductCreateInput): Promise<Product> {
+  async create(@common.Body() data: UserCreateInput): Promise<User> {
     return await this.service.create({
       data: data,
       select: {
         id: true,
         createdAt: true,
         updatedAt: true,
+        firstName: true,
+        lastName: true,
+        username: true,
+        roles: true,
       },
     });
   }
 
   @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
-  @swagger.ApiOkResponse({ type: [Product] })
-  @ApiNestedQuery(ProductFindManyArgs)
+  @swagger.ApiOkResponse({ type: [User] })
+  @ApiNestedQuery(UserFindManyArgs)
   @nestAccessControl.UseRoles({
-    resource: "Product",
+    resource: "User",
     action: "read",
     possession: "any",
   })
   @swagger.ApiForbiddenResponse({
     type: errors.ForbiddenException,
   })
-  async findMany(@common.Req() request: Request): Promise<Product[]> {
-    const args = plainToClass(ProductFindManyArgs, request.query);
+  async findMany(@common.Req() request: Request): Promise<User[]> {
+    const args = plainToClass(UserFindManyArgs, request.query);
     return this.service.findMany({
       ...args,
       select: {
         id: true,
         createdAt: true,
         updatedAt: true,
+        firstName: true,
+        lastName: true,
+        username: true,
+        roles: true,
       },
     });
   }
 
   @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
-  @swagger.ApiOkResponse({ type: Product })
+  @swagger.ApiOkResponse({ type: User })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
   @nestAccessControl.UseRoles({
-    resource: "Product",
+    resource: "User",
     action: "read",
     possession: "own",
   })
@@ -94,14 +102,18 @@ export class ProductControllerBase {
     type: errors.ForbiddenException,
   })
   async findOne(
-    @common.Param() params: ProductWhereUniqueInput
-  ): Promise<Product | null> {
+    @common.Param() params: UserWhereUniqueInput
+  ): Promise<User | null> {
     const result = await this.service.findOne({
       where: params,
       select: {
         id: true,
         createdAt: true,
         updatedAt: true,
+        firstName: true,
+        lastName: true,
+        username: true,
+        roles: true,
       },
     });
     if (result === null) {
@@ -114,10 +126,10 @@ export class ProductControllerBase {
 
   @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
-  @swagger.ApiOkResponse({ type: Product })
+  @swagger.ApiOkResponse({ type: User })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
   @nestAccessControl.UseRoles({
-    resource: "Product",
+    resource: "User",
     action: "update",
     possession: "any",
   })
@@ -125,9 +137,9 @@ export class ProductControllerBase {
     type: errors.ForbiddenException,
   })
   async update(
-    @common.Param() params: ProductWhereUniqueInput,
-    @common.Body() data: ProductUpdateInput
-  ): Promise<Product | null> {
+    @common.Param() params: UserWhereUniqueInput,
+    @common.Body() data: UserUpdateInput
+  ): Promise<User | null> {
     try {
       return await this.service.update({
         where: params,
@@ -136,6 +148,10 @@ export class ProductControllerBase {
           id: true,
           createdAt: true,
           updatedAt: true,
+          firstName: true,
+          lastName: true,
+          username: true,
+          roles: true,
         },
       });
     } catch (error) {
@@ -149,10 +165,10 @@ export class ProductControllerBase {
   }
 
   @common.Delete("/:id")
-  @swagger.ApiOkResponse({ type: Product })
+  @swagger.ApiOkResponse({ type: User })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
   @nestAccessControl.UseRoles({
-    resource: "Product",
+    resource: "User",
     action: "delete",
     possession: "any",
   })
@@ -160,8 +176,8 @@ export class ProductControllerBase {
     type: errors.ForbiddenException,
   })
   async delete(
-    @common.Param() params: ProductWhereUniqueInput
-  ): Promise<Product | null> {
+    @common.Param() params: UserWhereUniqueInput
+  ): Promise<User | null> {
     try {
       return await this.service.delete({
         where: params,
@@ -169,6 +185,10 @@ export class ProductControllerBase {
           id: true,
           createdAt: true,
           updatedAt: true,
+          firstName: true,
+          lastName: true,
+          username: true,
+          roles: true,
         },
       });
     } catch (error) {

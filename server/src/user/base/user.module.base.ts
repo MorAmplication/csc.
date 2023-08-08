@@ -17,4 +17,4 @@ import { AuthModule } from "../../auth/auth.module";
   imports: [ACLModule, forwardRef(() => AuthModule), MorganModule],
   exports: [ACLModule, AuthModule, MorganModule],
 })
-export class ProductModuleBase {}
+export class UserModuleBase {}

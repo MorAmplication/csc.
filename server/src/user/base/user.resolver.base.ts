@@ -18,28 +18,31 @@ import * as gqlACGuard from "../../auth/gqlAC.guard";
 import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
 import * as common from "@nestjs/common";
 import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
-import { DeleteProductArgs } from "./DeleteProductArgs";
-import { ProductCountArgs } from "./ProductCountArgs";
-import { ProductFindManyArgs } from "./ProductFindManyArgs";
-import { ProductFindUniqueArgs } from "./ProductFindUniqueArgs";
-import { Product } from "./Product";
-import { ProductService } from "../product.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { CreateUserArgs } from "./CreateUserArgs";
+import { UpdateUserArgs } from "./UpdateUserArgs";
+import { DeleteUserArgs } from "./DeleteUserArgs";
+import { UserCountArgs } from "./UserCountArgs";
+import { UserFindManyArgs } from "./UserFindManyArgs";
+import { UserFindUniqueArgs } from "./UserFindUniqueArgs";
+import { User } from "./User";
+import { UserService } from "../user.service";
 @common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
-@graphql.Resolver(() => Product)
-export class ProductResolverBase {
+@graphql.Resolver(() => User)
+export class UserResolverBase {
   constructor(
-    protected readonly service: ProductService,
+    protected readonly service: UserService,
     protected readonly rolesBuilder: nestAccessControl.RolesBuilder
   ) {}
 
   @graphql.Query(() => MetaQueryPayload)
   @nestAccessControl.UseRoles({
-    resource: "Product",
+    resource: "User",
     action: "read",
     possession: "any",
   })
-  async _productsMeta(
-    @graphql.Args() args: ProductCountArgs
+  async _usersMeta(
+    @graphql.Args() args: UserCountArgs
   ): Promise<MetaQueryPayload> {
     const result = await this.service.count(args);
     return {
@@ -48,28 +51,24 @@ export class ProductResolverBase {
   }
 
   @common.UseInterceptors(AclFilterResponseInterceptor)
-  @graphql.Query(() => [Product])
+  @graphql.Query(() => [User])
   @nestAccessControl.UseRoles({
-    resource: "Product",
+    resource: "User",
     action: "read",
     possession: "any",
   })
-  async products(
-    @graphql.Args() args: ProductFindManyArgs
-  ): Promise<Product[]> {
+  async users(@graphql.Args() args: UserFindManyArgs): Promise<User[]> {
     return this.service.findMany(args);
   }
 
   @common.UseInterceptors(AclFilterResponseInterceptor)
-  @graphql.Query(() => Product, { nullable: true })
+  @graphql.Query(() => User, { nullable: true })
   @nestAccessControl.UseRoles({
-    resource: "Product",
+    resource: "User",
     action: "read",
     possession: "own",
   })
-  async product(
-    @graphql.Args() args: ProductFindUniqueArgs
-  ): Promise<Product | null> {
+  async user(@graphql.Args() args: UserFindUniqueArgs): Promise<User | null> {
     const result = await this.service.findOne(args);
     if (result === null) {
       return null;
@@ -77,15 +76,50 @@ export class ProductResolverBase {
     return result;
   }
 
-  @graphql.Mutation(() => Product)
+  @common.UseInterceptors(AclValidateRequestInterceptor)
+  @graphql.Mutation(() => User)
   @nestAccessControl.UseRoles({
-    resource: "Product",
+    resource: "User",
+    action: "create",
+    possession: "any",
+  })
+  async createUser(@graphql.Args() args: CreateUserArgs): Promise<User> {
+    return await this.service.create({
+      ...args,
+      data: args.data,
+    });
+  }
+
+  @common.UseInterceptors(AclValidateRequestInterceptor)
+  @graphql.Mutation(() => User)
+  @nestAccessControl.UseRoles({
+    resource: "User",
+    action: "update",
+    possession: "any",
+  })
+  async updateUser(@graphql.Args() args: UpdateUserArgs): Promise<User | null> {
+    try {
+      return await this.service.update({
+        ...args,
+        data: args.data,
+      });
+    } catch (error) {
+      if (isRecordNotFoundError(error)) {
+        throw new apollo.ApolloError(
+          `No resource was found for ${JSON.stringify(args.where)}`
+        );
+      }
+      throw error;
+    }
+  }
+
+  @graphql.Mutation(() => User)
+  @nestAccessControl.UseRoles({
+    resource: "User",
     action: "delete",
     possession: "any",
   })
-  async deleteProduct(
-    @graphql.Args() args: DeleteProductArgs
-  ): Promise<Product | null> {
+  async deleteUser(@graphql.Args() args: DeleteUserArgs): Promise<User | null> {
     try {
       return await this.service.delete(args);
     } catch (error) {
